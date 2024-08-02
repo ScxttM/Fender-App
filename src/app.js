@@ -1,5 +1,7 @@
 import express, { json } from "express";
 import corsMiddleware from "./middlewares/cors.js";
+import verifyToken from "./middlewares/auth.js";
+import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.js";
 import "dotenv/config";
 
@@ -9,11 +11,12 @@ const createApp = () => {
   const app = express();
   app.use(json());
   app.use(corsMiddleware());
+  app.use(cookieParser());
   app.disable("x-powered-by");
 
   app.post("/login", userRouter);
   app.post("/register", userRouter);
-  app.use("/users", userRouter);
+  app.use("/users", verifyToken, userRouter);
 
   app.listen(PORT, () => {
     console.log(
