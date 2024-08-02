@@ -1,6 +1,7 @@
 import UserModel from "../models/user.model.js";
 import { validateUser, validatePartialUser } from "../schemas/user.schema.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export class UserController {
   getAll = async (req, res) => {
@@ -33,5 +34,32 @@ export class UserController {
     const hash = await bcrypt.hash(password, 10);
     const id = await UserModel.create({ name, email, password: hash });
     res.json({ id });
+  };
+
+  login = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await UserModel.login({ email, password });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const token = jwt.sign({ id: user.iduser }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600000,
+      })
+      .json({ token, firstLogin: user.firstLogin });
+  };
+
+  logout = (req, res) => {
+    res.clearCookie("token").json({ message: "Logged out" });
   };
 }

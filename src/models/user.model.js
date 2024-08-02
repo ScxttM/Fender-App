@@ -1,4 +1,5 @@
 import connection from "../database.js";
+import bcrypt from "bcrypt";
 
 export default class User {
   static async getAll() {
@@ -25,5 +26,38 @@ export default class User {
     );
 
     return result.insertId;
+  }
+
+  static async getByEmail({ email }) {
+    const [user] = await connection.query(
+      "SELECT BIN_TO_UUID(iduser) as iduser, name, email FROM users WHERE email = ?;",
+      [email]
+    );
+
+    return user[0];
+  }
+
+  static async login({ email, password }) {
+    const [result] = await connection.query(
+      "SELECT BIN_TO_UUID(iduser) as iduser, name, email, password FROM users WHERE email = ?;",
+      [email]
+    );
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const user = result[0];
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return null;
+    }
+
+    const firstLogin = await bcrypt.compare("123456", user.password);
+    user.firstLogin = firstLogin;
+
+    delete user.password;
+
+    return user;
   }
 }
