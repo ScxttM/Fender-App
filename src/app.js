@@ -1,5 +1,6 @@
 import express, { json } from "express";
-import { corsMiddleware } from "./middlewares/cors.js";
+import corsMiddleware from "./middlewares/cors.js";
+import userRouter from "./routes/user.js";
 import "dotenv/config";
 
 const PORT = process.env.PORT || 3000;
@@ -10,9 +11,9 @@ const createApp = () => {
   app.use(corsMiddleware());
   app.disable("x-powered-by");
 
-  app.get("/", (req, res) => {
-    res.json({ message: "Hello World!" });
-  });
+  app.post("/login", userRouter);
+  app.post("/register", userRouter);
+  app.use("/users", userRouter);
 
   app.listen(PORT, () => {
     console.log(
