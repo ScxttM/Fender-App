@@ -28,6 +28,33 @@ export default class User {
     return result.insertId;
   }
 
+  static async update({ id, name, email, password }) {
+    let query = "UPDATE users SET ";
+    const params = [];
+
+    if (name) {
+      query += "name = ?, ";
+      params.push(name);
+    }
+
+    if (email) {
+      query += "email = ?, ";
+      params.push(email);
+    }
+
+    if (password) {
+      query += "password = ?, ";
+      params.push(password);
+    }
+
+    query = query.slice(0, -2);
+    query += " WHERE iduser = UUID_TO_BIN(?);";
+
+    params.push(id);
+
+    await connection.query(query, params);
+  }
+
   static async getByEmail({ email }) {
     const [user] = await connection.query(
       "SELECT BIN_TO_UUID(iduser) as iduser, name, email FROM users WHERE email = ?;",

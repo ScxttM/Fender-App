@@ -36,6 +36,27 @@ export class UserController {
     res.json({ id });
   };
 
+  update = async (req, res) => {
+    const result = validatePartialUser(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    const { id } = req.params;
+    const { name, email, password } = result.data;
+
+    const existingUser = await UserModel.getById({ id });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found", id });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    await UserModel.update({ id, name, email, password: hash });
+    res.json({ message: "User updated" });
+  };
+
   login = async (req, res) => {
     const { email, password } = req.body;
 
