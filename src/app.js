@@ -15,6 +15,7 @@ const createApp = () => {
   app.disable("x-powered-by");
 
   app.post("/login", userRouter);
+  app.post("/logout", userRouter);
   app.post("/register", userRouter);
   app.use("/users", verifyToken, userRouter);
 
