@@ -16,7 +16,7 @@ const createUserRouter = (cache) => {
   userRouter.put("/password/:iduser", userController.updatePassword);
   userRouter.delete("/:iduser", userController.delete);
   userRouter.post(
-    "/upload/:iduser",
+    "/:iduser/upload-profile-picture",
     upload.single("file"),
     userController.uploadProfilePicture
   );

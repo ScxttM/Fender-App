@@ -161,6 +161,10 @@ export class UserController {
     const { iduser } = req.params;
     const file = req.file;
 
+    if (!file) {
+      return res.status(400).json({ error: "Please upload a file" });
+    }
+
     const user = await UserModel.getById({ iduser });
 
     if (!user) {
@@ -169,10 +173,12 @@ export class UserController {
 
     const result = await UserModel.uploadProfilePicture(iduser, file);
 
-    if (!result) {
+    if (!result.success) {
       return res.status(500).json({ error: "Error uploading profile picture" });
     }
 
-    res.json({ message: "Profile picture uploaded" });
+    user.profile_picture = result.profilePicture;
+
+    res.json({ message: "Profile picture uploaded", user });
   };
 }

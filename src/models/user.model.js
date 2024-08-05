@@ -153,13 +153,15 @@ export default class User {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       }
 
-      const newFilePath = "uploads/" + file.filename;
       const [result] = await connection.query(
         "UPDATE users SET profile_picture = ? WHERE iduser = UUID_TO_BIN(?);",
-        [newFilePath, iduser]
+        [file.filename, iduser]
       );
 
-      return result;
+      return {
+        success: result.affectedRows === 1,
+        profilePicture: file.filename,
+      };
     } catch (error) {
       console.error(error);
       return null;
