@@ -1,6 +1,10 @@
 import cors from "cors";
 
-const ACCEPTED_ORIGINS = ["http://localhost:8080", "http://localhost:3000"];
+const ACCEPTED_ORIGINS = [
+  "http://localhost:8080",
+  "http://localhost:3000",
+  "https://master--alan-fender-assessment.netlify.app",
+];
 
 const corsMiddleware = ({ acceptedOrigins = ACCEPTED_ORIGINS } = {}) =>
   cors({
