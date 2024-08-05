@@ -15,6 +15,10 @@ const createFavoritesRouter = (cache) => {
     "/rick-and-morty/:iduser",
     favoritesController.getRickAndMortyFavorites
   );
+  favoritesRouter.get(
+    "/rick-and-morty/:iduser/data",
+    favoritesController.getRickAndMortyFavoritesData
+  );
   favoritesRouter.post(
     "/rick-and-morty",
     favoritesController.createRickAndMortyFavorite
@@ -29,6 +33,10 @@ const createFavoritesRouter = (cache) => {
   favoritesRouter.get(
     "/pokemon/:iduser",
     favoritesController.getPokemonFavorites
+  );
+  favoritesRouter.get(
+    "/pokemon/:iduser/data",
+    favoritesController.getPokemonFavoritesData
   );
   favoritesRouter.post("/pokemon", favoritesController.createPokemonFavorite);
   favoritesRouter.delete(
