@@ -107,7 +107,7 @@ export class UserController {
       return res.status(500).json({ error: "Error updating password" });
     }
 
-    res.json({ message: "Password updated" });
+    res.json({ message: "Password updated", user: { iduser } });
   };
 
   delete = async (req, res) => {
