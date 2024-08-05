@@ -1,7 +1,6 @@
 import express, { json } from "express";
 import corsMiddleware from "./middlewares/cors.js";
 import verifyToken from "./middlewares/auth.js";
-import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.js";
 import "dotenv/config";
 
@@ -11,9 +10,11 @@ const createApp = () => {
   const app = express();
   app.use(json());
   app.use(corsMiddleware());
-  app.use(cookieParser());
   app.disable("x-powered-by");
 
+  app.get("/", (req, res) => {
+    res.json({ message: "API is working" });
+  });
   app.post("/login", userRouter);
   app.post("/logout", userRouter);
   app.post("/register", userRouter);
