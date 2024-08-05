@@ -4,6 +4,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export class UserController {
+  constructor(cache) {
+    this.cache = cache;
+  }
+
   getAll = async (req, res) => {
     const users = await UserModel.getAll();
 
