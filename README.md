@@ -62,6 +62,7 @@ DB_HOST=your_database_host
 DB_USER=your_database_user
 DB_PASSWORD=your_database_password
 JWT_SECRET=your_jwt_secret
+```
 
 ## Usage
 
