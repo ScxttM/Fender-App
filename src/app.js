@@ -3,8 +3,9 @@ import corsMiddleware from "./middlewares/cors.js";
 import verifyToken from "./middlewares/auth.js";
 import createUserRouter from "./routes/user.js";
 import createFavoritesRouter from "./routes/favorites.js";
+import createRickAndMortyRouter from "./routes/rick-and-morty.js";
+import createPokemonRouter from "./routes/pokemon.js";
 import "dotenv/config";
-import axios from "axios";
 import NodeCache from "node-cache";
 
 const cache = new NodeCache();
@@ -26,62 +27,12 @@ const createApp = () => {
   app.use("/users", verifyToken, createUserRouter(cache));
   app.use("/favorites", verifyToken, createFavoritesRouter(cache));
 
-  app.get("/rick-and-morty", async (req, res) => {
-    const page = req.query.page || 1;
-    const url = `https://rickandmortyapi.com/api/character/?page=${page}`;
+  app.use("/rick-and-morty", verifyToken, createRickAndMortyRouter(cache));
+  app.use("/pokemon", verifyToken, createPokemonRouter(cache));
 
-    let data = cache.get(url);
-
-    if (!data) {
-      const response = await axios.get(url);
-      data = response.data;
-      cache.set(url, data, 24 * 60 * 60); // 24 hours
-    }
-
-    res.json(data);
-  });
-
-  app.get("/pokemon", async (req, res) => {
-    const page = req.query.page || 1;
-    const offset = (page - 1) * 20;
-    const url = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${offset}`;
-
-    const data = [];
-    let pokemonList = cache.get(url);
-
-    if (!pokemonList) {
-      const response = await axios.get(url);
-      pokemonList = response.data;
-      cache.set(url, pokemonList, 24 * 60 * 60); // 24 hours
-    }
-
-    for (const pokemon of pokemonList.results) {
-      let pokemonData = cache.get(pokemon.url);
-
-      if (!pokemonData) {
-        const response = await axios.get(pokemon.url);
-        pokemonData = {
-          id: response.data.id,
-          image: response.data.sprites.front_default,
-          types: response.data.types.map((type) => type.type.name),
-        };
-
-        cache.set(pokemon.url, pokemonData, 24 * 60 * 60); // 24 hours
-      }
-
-      pokemonData.name = pokemon.name;
-
-      data.push(pokemonData);
-    }
-
-    res.json({
-      info: {
-        count: pokemonList.count,
-        next: pokemonList.next,
-        prev: pokemonList.previous,
-      },
-      results: data,
-    });
+  app.get("/uploads/:file", (req, res) => {
+    const { file } = req.params;
+    res.sendFile(file, { root: "uploads" });
   });
 
   app.listen(PORT, () => {
