@@ -2,7 +2,7 @@ import express, { json } from "express";
 import corsMiddleware from "./middlewares/cors.js";
 import verifyToken from "./middlewares/auth.js";
 import createUserRouter from "./routes/user.js";
-import favoritesRouter from "./routes/favorites.js";
+import createFavoritesRouter from "./routes/favorites.js";
 import "dotenv/config";
 import axios from "axios";
 import NodeCache from "node-cache";
@@ -24,7 +24,7 @@ const createApp = () => {
   app.post("/logout", createUserRouter(cache));
   app.post("/register", createUserRouter(cache));
   app.use("/users", verifyToken, createUserRouter(cache));
-  app.use("/favorites", verifyToken, favoritesRouter);
+  app.use("/favorites", verifyToken, createFavoritesRouter(cache));
 
   app.get("/pokemon", async (req, res) => {
     const page = req.query.page || 1;
