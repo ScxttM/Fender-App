@@ -23,7 +23,10 @@ export class FavoritesController {
   createRickAndMortyFavorite = async (req, res) => {
     const { id } = req.body;
     const iduser = req.session.iduser;
-    const result = await FavoritesModel.create({ iduser, api_id: id });
+    const result = await FavoritesModel.createRickAndMortyFavorite({
+      iduser,
+      api_id: id,
+    });
 
     if (!result) {
       return res.status(500).json({ error: "Error creating favorite" });
@@ -35,7 +38,10 @@ export class FavoritesController {
   deleteRickAndMortyFavorite = async (req, res) => {
     const { id } = req.params;
     const iduser = req.session.iduser;
-    const result = await FavoritesModel.delete({ iduser, api_id: id });
+    const result = await FavoritesModel.deleteRickAndMortyFavorite({
+      iduser,
+      api_id: id,
+    });
 
     if (!result) {
       return res.status(500).json({ error: "Error deleting favorite" });
