@@ -26,6 +26,21 @@ const createApp = () => {
   app.use("/users", verifyToken, createUserRouter(cache));
   app.use("/favorites", verifyToken, createFavoritesRouter(cache));
 
+  app.get("/rick-and-morty", async (req, res) => {
+    const page = req.query.page || 1;
+    const url = `https://rickandmortyapi.com/api/character/?page=${page}`;
+
+    let data = cache.get(url);
+
+    if (!data) {
+      const response = await axios.get(url);
+      data = response.data;
+      cache.set(url, data, 24 * 60 * 60); // 24 hours
+    }
+
+    res.json(data);
+  });
+
   app.get("/pokemon", async (req, res) => {
     const page = req.query.page || 1;
     const offset = (page - 1) * 20;
