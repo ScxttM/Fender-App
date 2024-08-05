@@ -33,6 +33,10 @@ export class FavoritesController {
       return res.status(500).json({ error: "Error getting favorites" });
     }
 
+    if (favorites.length === 0) {
+      return res.json([]);
+    }
+
     let url = "https://rickandmortyapi.com/api/character/";
     favorites.forEach((favorite) => {
       url += `${favorite.id},`;
