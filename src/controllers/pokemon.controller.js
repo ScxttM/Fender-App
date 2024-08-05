@@ -86,7 +86,7 @@ export class PokemonController {
       }
 
       res.json(data);
-    } catch (error) {
+    } catch {
       res.status(500).json({ message: "Pokemon not found" });
     }
   };
