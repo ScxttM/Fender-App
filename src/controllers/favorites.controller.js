@@ -52,6 +52,10 @@ export class FavoritesController {
       this.cache.set(url, data, 24 * 60 * 60); // 24 hours
     }
 
+    if (favorites.length === 1) {
+      data = [data];
+    }
+
     res.json(data);
   };
 
