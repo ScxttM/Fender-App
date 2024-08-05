@@ -4,6 +4,7 @@ const ACCEPTED_ORIGINS = [
   "http://localhost:8080",
   "http://localhost:3000",
   "https://master--alan-fender-assessment.netlify.app",
+  "https://alan-fender-assessment.netlify.app",
 ];
 
 const corsMiddleware = ({ acceptedOrigins = ACCEPTED_ORIGINS } = {}) =>
