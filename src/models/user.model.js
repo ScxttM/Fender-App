@@ -16,11 +16,11 @@ export default class User {
     }
   }
 
-  static async getById({ id }) {
+  static async getById({ iduser }) {
     try {
       const [user] = await connection.query(
-        "SELECT BIN_TO_UUID(iduser) as iduser, name, email FROM users WHERE iduser = UUID_TO_BIN(?);",
-        [id]
+        "SELECT BIN_TO_UUID(iduser) as iduser, name, email, profile_picture FROM users WHERE iduser = UUID_TO_BIN(?);",
+        [iduser]
       );
 
       return user[0];
@@ -37,14 +37,20 @@ export default class User {
         [name, email, password]
       );
 
-      return result.insertId;
+      const id = result.insertId;
+      const [user] = await connection.query(
+        "SELECT BIN_TO_UUID(iduser) as iduser, name, email FROM users WHERE id= ?;",
+        [id]
+      );
+
+      return user[0];
     } catch (error) {
       console.error(error);
       return null;
     }
   }
 
-  static async update({ id, name, email, password }) {
+  static async update({ iduser, name, email, password }) {
     try {
       let query = "UPDATE users SET ";
       const params = [];
@@ -67,7 +73,7 @@ export default class User {
       query = query.slice(0, -2);
       query += " WHERE iduser = UUID_TO_BIN(?);";
 
-      params.push(id);
+      params.push(iduser);
 
       const [result] = await connection.query(query, params);
 
@@ -78,11 +84,11 @@ export default class User {
     }
   }
 
-  static async delete({ id }) {
+  static async delete({ iduser }) {
     try {
       const [result] = await connection.query(
         "DELETE FROM users WHERE iduser = UUID_TO_BIN(?);",
-        [id]
+        [iduser]
       );
 
       return result.affectedRows === 1;
@@ -135,11 +141,11 @@ export default class User {
     }
   }
 
-  static async uploadProfilePicture(id, file) {
+  static async uploadProfilePicture(iduser, file) {
     try {
       const [user] = await connection.query(
         "SELECT profile_picture FROM users WHERE iduser = UUID_TO_BIN(?);",
-        [id]
+        [iduser]
       );
 
       if (user[0].profile_picture) {
@@ -150,7 +156,7 @@ export default class User {
       const newFilePath = "uploads/" + file.filename;
       const [result] = await connection.query(
         "UPDATE users SET profile_picture = ? WHERE iduser = UUID_TO_BIN(?);",
-        [newFilePath, id]
+        [newFilePath, iduser]
       );
 
       return result;

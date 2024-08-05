@@ -1,5 +1,5 @@
 import UserModel from "../models/user.model.js";
-import { validateUser, validatePartialUser } from "../schemas/user.schema.js";
+import { validatePartialUser } from "../schemas/user.schema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -15,11 +15,15 @@ export class UserController {
   };
 
   getById = async (req, res) => {
-    const { id } = req.params;
-    const user = await UserModel.getById({ id });
+    const { iduser } = req.params;
+    const user = await UserModel.getById({ iduser });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found ", id });
+      return res.status(404).json({ error: "User not found ", iduser });
+    }
+
+    if (user.iduser === req.session.iduser) {
+      user.itsMe = true;
     }
 
     res.json(user);
@@ -42,13 +46,13 @@ export class UserController {
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const id = await UserModel.create({ name, email, password: hash });
+    const user = await UserModel.create({ name, email, password: hash });
 
-    if (!id) {
+    if (!user) {
       return res.status(500).json({ error: "Error creating user" });
     }
 
-    res.json({ message: "User created" });
+    res.json({ message: "User created", user });
   };
 
   update = async (req, res) => {
@@ -58,35 +62,60 @@ export class UserController {
       return res.status(400).json({ error: validation.error });
     }
 
-    const { id } = req.params;
-    const { name, email, password } = validation.data;
+    const { iduser } = req.params;
+    const { name, email } = validation.data;
 
-    const existingUser = await UserModel.getById({ id });
+    const existingUser = await UserModel.getById({ iduser });
 
     if (!existingUser) {
-      return res.status(404).json({ error: "User not found", id });
+      return res.status(404).json({ error: "User not found", iduser });
     }
 
-    const hash = await bcrypt.hash(password, 10);
-    const result = await UserModel.update({ id, name, email, password: hash });
+    const result = await UserModel.update({ iduser, name, email });
 
     if (!result) {
       return res.status(500).json({ error: "Error updating user" });
     }
 
-    res.json({ message: "User updated" });
+    res.json({ message: "User updated", user: { iduser, name, email } });
+  };
+
+  updatePassword = async (req, res) => {
+    const validation = validatePartialUser(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    const { iduser } = req.params;
+    const { password } = validation.data;
+
+    const existingUser = await UserModel.getById({ iduser });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found", iduser });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const result = await UserModel.update({ iduser, password: hash });
+
+    if (!result) {
+      return res.status(500).json({ error: "Error updating password" });
+    }
+
+    res.json({ message: "Password updated" });
   };
 
   delete = async (req, res) => {
-    const { id } = req.params;
+    const { iduser } = req.params;
 
-    const user = await UserModel.getById({ id });
+    const user = await UserModel.getById({ iduser });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const result = await UserModel.delete({ id });
+    const result = await UserModel.delete({ iduser });
 
     if (!result) {
       return res.status(500).json({ error: "Error deleting user" });
@@ -108,18 +137,16 @@ export class UserController {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user.iduser }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+    const token = jwt.sign({ iduser: user.iduser }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
     });
 
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        sameSite: "none",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 3600000,
-      })
-      .json({ token, firstLogin: user.firstLogin });
+    res.json({
+      token,
+      firstLogin: user.firstLogin,
+      iduser: user.iduser,
+      name: user.name,
+    });
   };
 
   logout = (req, res) => {
@@ -127,16 +154,16 @@ export class UserController {
   };
 
   uploadProfilePicture = async (req, res) => {
-    const { id } = req.params;
+    const { iduser } = req.params;
     const file = req.file;
 
-    const user = await UserModel.getById({ id });
+    const user = await UserModel.getById({ iduser });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const result = await UserModel.uploadProfilePicture(id, file);
+    const result = await UserModel.uploadProfilePicture(iduser, file);
 
     if (!result) {
       return res.status(500).json({ error: "Error uploading profile picture" });

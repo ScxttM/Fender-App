@@ -7,14 +7,15 @@ const userRouter = Router();
 const userController = new UserController();
 
 userRouter.get("/", userController.getAll);
-userRouter.get("/:id", userController.getById);
+userRouter.get("/:iduser", userController.getById);
 userRouter.post("/register", userController.create);
 userRouter.post("/login", userController.login);
 userRouter.post("/logout", userController.logout);
-userRouter.put("/:id", userController.update);
-userRouter.delete("/:id", userController.delete);
+userRouter.put("/:iduser", userController.update);
+userRouter.put("/password/:iduser", userController.updatePassword);
+userRouter.delete("/:iduser", userController.delete);
 userRouter.post(
-  "/upload/:id",
+  "/upload/:iduser",
   upload.single("file"),
   userController.uploadProfilePicture
 );
